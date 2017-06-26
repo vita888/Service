@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Service</string>
+    <string name="btn1">start service</string>
+    <string name="btn2">stop service</string>
+    <string name="btn3">bind service</string>
+    <string name="btn4">unbind service</string>
+    <string name="btn5">acquire service</string>
+    <string name="btn6">intentservice</string>
+    <string name="btn7">MUSIC</string>
+</resources>
