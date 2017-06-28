@@ -4,7 +4,9 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.nfc.Tag;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+    public final String TAG ="######";
     private Button mStart;
     private Button mStop;
     private Button mBind;
@@ -20,8 +23,32 @@ public class MainActivity extends AppCompatActivity {
     private Button mStatus;
     private Button mIntnetService;
     private Button mMusic;
+    private Button mRemote;
     TestService2.MyBinder mBinder;
     Boolean musicTogle = false;
+     Intent intentmusic ;
+    IMyAidlInterface mIMyAidlInterface;
+
+    private ServiceConnection remoteConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "onServiceConnected() called with: name = [" + name + "], service = [" + service + "]");
+           mIMyAidlInterface = IMyAidlInterface.Stub.asInterface(service);
+            try{
+                int result = mIMyAidlInterface.plus(10,10);
+                String upper = mIMyAidlInterface.toUpperCase("hello");
+                Log.i(TAG, "result: "+result);
+                Log.i(TAG, "upper: "+upper);
+             }catch (RemoteException e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "onServiceDisconnected() called with: name = [" + name + "]");
+        }
+    };
 
     private ServiceConnection mConn = new ServiceConnection() {
         @Override
@@ -43,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.i("#####", "------Service Connected-------");
             mMusicBinder = (MusicService.MusicBinder)service;
+            Toast.makeText(MainActivity.this, "正在播放：" + mMusicBinder.name, Toast.LENGTH_SHORT).show();
+
         }
 
         @Override
@@ -62,13 +91,15 @@ public class MainActivity extends AppCompatActivity {
         mStatus = (Button) findViewById(R.id.btn5);
         mIntnetService = (Button) findViewById(R.id.btn6);
         mMusic = (Button)findViewById(R.id.btn7);
+        mRemote = (Button)findViewById(R.id.btn8);
 
         final Intent intent = new Intent(this, TestService.class);
         final Intent intent1 = new Intent(this, TestService2.class);
+         intentmusic  =new Intent(MainActivity.this,MusicService.class);
 
 
-        intent.setAction("com.example.vita.service.TestService");
-        intent1.setAction("com.example.vita.service.TestService2");
+      //  intent.setAction("com.example.vita.service.TestService");
+     //   intent1.setAction("com.example.vita.service.TestService2");
 
         final Intent it1 = new Intent();
         it1.setAction("android.intent.service.TEST_SERVICE3");
@@ -92,7 +123,8 @@ public class MainActivity extends AppCompatActivity {
         it3.putExtras(b3);
 
         //final Intent itmusic = new Intent(this,MusicService.class);
-        final Intent intentmusic =new Intent(MainActivity.this,MusicService.class);
+      final Intent intentmusic =new Intent(MainActivity.this,MusicService.class);
+//
 
         mMusic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,13 +132,22 @@ public class MainActivity extends AppCompatActivity {
                 musicTogle=!musicTogle;
                 if (musicTogle){
                     //Intent intentmusic =new Intent(MainActivity.this,MusicService.class);
-                    Toast.makeText(MainActivity.this,"正在播放："+mMusicBinder.getName(),Toast.LENGTH_SHORT).show();
                     startService(intentmusic);
+                    bindService(intentmusic,musicConn,Service.BIND_AUTO_CREATE);
+                    //startService(intentmusic);
+
+                    if (mMusicBinder!=null){
+
+                        Toast.makeText(MainActivity.this, "正在播放：" + mMusicBinder.name, Toast.LENGTH_SHORT).show();
+                    }
+
                 }
                 else {
-                  //  Intent intentmusic =new Intent(MainActivity.this,MusicService.class);
-                    Toast.makeText(MainActivity.this,"结束播放",Toast.LENGTH_SHORT).show();
+                    Intent intentmusic =new Intent(MainActivity.this,MusicService.class);
+                    //unbindService(musicConn);
                     stopService(intentmusic);
+                     unbindService(musicConn);
+                    Toast.makeText(MainActivity.this,"结束播放",Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -123,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 stopService(intent);
                 Log.i("###############", "点击了停止按钮");
+
             }
         });
 
@@ -154,7 +196,18 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        mRemote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "onClick: ");
+                Intent remoteIntent = new Intent(RemoteService.class.getName());//这是一个action
+                remoteIntent.setClassName("com.example.vita.service","com.example.vita.service.RemoteService");
+               bindService(remoteIntent,remoteConn,BIND_AUTO_CREATE);
+            }
+        });
 
 
     }
+
+
 }

@@ -7,4 +7,5 @@
     <string name="btn5">acquire service</string>
     <string name="btn6">intentservice</string>
     <string name="btn7">MUSIC</string>
+    <string name="btn8">RemoteService</string>
 </resources>

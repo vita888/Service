@@ -56,11 +56,21 @@
         android:layout_margin="10dp"
         android:layout_toRightOf="@+id/btn5"
         android:text="@string/btn6" />
+
     <Button
+        android:id="@+id/btn7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/btn6"
         android:text="@string/btn7"
-        android:id="@+id/btn7"/>
+        android:layout_margin="10dp"/>
+
+    <Button
+        android:id="@+id/btn8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn7"
+        android:text="@string/btn8"
+        android:layout_margin="10dp"/>
 
 </RelativeLayout>
